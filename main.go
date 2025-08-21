@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/parser"
 	"github.com/goccy/go-yaml/printer"
 	"github.com/kr/pretty"
@@ -12,9 +13,15 @@ import (
 )
 
 type action struct {
-	inputFile   string
+	inputFile string
+	do        struct {
+		merge   bool
+		astDump bool
+	}
+	merge struct {
+		root, file string
+	}
 	astDumpFile string
-	do          struct{ astDump bool }
 
 	help func()
 }
@@ -24,6 +31,22 @@ func run(a *action) error {
 	f, err := parser.ParseFile(a.inputFile, parser.ParseComments)
 	if err != nil {
 		return fmt.Errorf("parse: %w", err)
+	}
+
+	if a.do.merge {
+		path, err := yaml.PathString(a.merge.root)
+		if err != nil {
+			return fmt.Errorf("merge root: %w", errors.Unwrap(err))
+		}
+
+		r, err := parser.ParseFile(a.merge.file, parser.ParseComments)
+		if err != nil {
+			return fmt.Errorf("merged file: %w", err)
+		}
+		err = path.MergeFromFile(f, r)
+		if err != nil {
+			return fmt.Errorf("merge: %w", err)
+		}
 	}
 
 	if a.do.astDump {
@@ -45,21 +68,34 @@ func run(a *action) error {
 	return nil
 }
 
-func parseArgs(args []string) (a action, _ error) {
-	const usage = `usage: yc [-d,--ast-dump=DUMPFILE] FILE`
-
+func parseArgs(args []string) (a action, err error) {
+	const usage = `usage: yc [FLAGS] FILE
+    -m,--merge=FILE
+    -r,--merge-root=YPATH (default "$")
+    -d,--ast-dump=DUMPFILE
+`
 	var p argp.PState
 	var rest []string
 flags:
 	for ; len(args) > 0 && p.Err == nil; args = args[1:] {
 		switch arg := args[0]; {
 
+		case p.IsFlagExpr(arg, "-m", "--merge"):
+			a.do.merge = true
+			a.merge.file = p.Val
+			if a.merge.root == "" {
+				a.merge.root = "$"
+			}
+
+		case p.IsFlagExpr(arg, "-r", "--merge-root"):
+			a.merge.root = p.Val
+
 		case p.IsFlagExpr(arg, "-d", "--ast-dump"):
 			a.do.astDump = true
 			a.astDumpFile = p.Val
 
 		case arg == "-h", arg == "--help":
-			a.help = func() { fmt.Println(usage) }
+			a.help = func() { fmt.Print(usage) }
 			return a, nil
 
 		case arg == "--":
