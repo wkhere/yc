@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
 	"github.com/goccy/go-yaml/printer"
 	"github.com/kr/pretty"
@@ -15,10 +16,12 @@ import (
 type action struct {
 	inputFile string
 	do        struct {
+		filter  bool
 		merge   bool
 		astDump bool
 	}
-	merge struct {
+	filter struct{ path string }
+	merge  struct {
 		root, file string
 	}
 	astDumpFile string
@@ -32,8 +35,23 @@ func run(a *action) error {
 	if err != nil {
 		return fmt.Errorf("parse: %w", err)
 	}
+	if len(f.Docs) > 1 {
+		return errors.New("multiple documents not handled")
+	}
+	var finalNode ast.Node
 
-	if a.do.merge {
+	switch {
+	case a.do.filter:
+		path, err := yaml.PathString(a.filter.path)
+		if err != nil {
+			return fmt.Errorf("filter path: %w", errors.Unwrap(err))
+		}
+		finalNode, err = path.FilterFile(f)
+		if err != nil {
+			return fmt.Errorf("filter: %w", err)
+		}
+
+	case a.do.merge:
 		path, err := yaml.PathString(a.merge.root)
 		if err != nil {
 			return fmt.Errorf("merge root: %w", errors.Unwrap(err))
@@ -47,6 +65,10 @@ func run(a *action) error {
 		if err != nil {
 			return fmt.Errorf("merge: %w", err)
 		}
+		fallthrough
+
+	default:
+		finalNode = f.Docs[0]
 	}
 
 	if a.do.astDump {
@@ -54,7 +76,7 @@ func run(a *action) error {
 		if err != nil {
 			return fmt.Errorf("dump: %w", err)
 		}
-		pretty.Fprintf(dump, "%# v\n", f)
+		pretty.Fprintf(dump, "%# v\n", finalNode)
 		err = dump.Close()
 		if err != nil {
 			return fmt.Errorf("dump: %w", err)
@@ -62,14 +84,14 @@ func run(a *action) error {
 	}
 
 	var p printer.Printer
-	// todo: there can be multiple yaml docs in one file, print all of them
-	os.Stdout.Write(p.PrintNode(f.Docs[0]))
+	os.Stdout.Write(p.PrintNode(finalNode))
 
 	return nil
 }
 
 func parseArgs(args []string) (a action, err error) {
 	const usage = `usage: yc [FLAGS] FILE
+    -f,--filter=YPATH
     -m,--merge=FILE
     -r,--merge-root=YPATH (default "$")
     -d,--ast-dump=DUMPFILE
@@ -79,6 +101,10 @@ func parseArgs(args []string) (a action, err error) {
 flags:
 	for ; len(args) > 0 && p.Err == nil; args = args[1:] {
 		switch arg := args[0]; {
+
+		case p.IsFlagExpr(arg, "-f", "--filter"):
+			a.do.filter = true
+			a.filter.path = p.Val
 
 		case p.IsFlagExpr(arg, "-m", "--merge"):
 			a.do.merge = true
@@ -113,6 +139,9 @@ flags:
 	switch {
 	case p.Err != nil:
 		return a, p.Err
+
+	case a.do.filter && a.do.merge:
+		return a, errors.New("conflicting flags")
 
 	case len(rest) != 1:
 		return a, errors.New("expected input FILE")
