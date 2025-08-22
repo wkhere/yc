@@ -105,6 +105,9 @@ flags:
 		case p.IsFlagExpr(arg, "-f", "--filter"):
 			a.do.filter = true
 			a.filter.path = p.Val
+			if a.filter.path[0] != '$' {
+				a.filter.path = "$" + a.filter.path
+			}
 
 		case p.IsFlagExpr(arg, "-m", "--merge"):
 			a.do.merge = true
@@ -115,6 +118,9 @@ flags:
 
 		case p.IsFlagExpr(arg, "-r", "--merge-root"):
 			a.merge.root = p.Val
+			if a.merge.root[0] != '$' {
+				a.merge.root = "$" + a.merge.root
+			}
 
 		case p.IsFlagExpr(arg, "-d", "--ast-dump"):
 			a.do.astDump = true
