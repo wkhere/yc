@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/goccy/go-yaml v1.18.0
 	github.com/kr/pretty v0.3.1
-	gitlab.com/wkhere/argp v0.2.0
+	gitlab.com/wkhere/argp v0.2.1
 )
 
 require (
