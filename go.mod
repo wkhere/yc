@@ -8,7 +8,7 @@ require (
 	gitlab.com/wkhere/argp v0.2.1
 )
 
-replace github.com/goccy/go-yaml => github.com/wkhere/go-yaml v1.18.1-fix1
+replace github.com/goccy/go-yaml => github.com/wkhere/go-yaml v1.18.1-fix2
 
 require (
 	github.com/kr/text v0.2.0 // indirect
