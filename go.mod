@@ -8,6 +8,8 @@ require (
 	gitlab.com/wkhere/argp v0.2.1
 )
 
+replace github.com/goccy/go-yaml => github.com/wkhere/go-yaml v1.18.1-fix1
+
 require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
