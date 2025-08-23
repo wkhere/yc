@@ -38,6 +38,7 @@ func run(a *action) error {
 	if len(f.Docs) > 1 {
 		return errors.New("multiple documents not handled")
 	}
+	var rootNode = f.Docs[0]
 	var finalNode ast.Node
 
 	switch {
@@ -46,10 +47,11 @@ func run(a *action) error {
 		if err != nil {
 			return fmt.Errorf("filter path: %w", errors.Unwrap(err))
 		}
-		finalNode, err = path.FilterFile(f)
+		node, err := path.FilterFile(f)
 		if err != nil {
 			return fmt.Errorf("filter: %w", err)
 		}
+		finalNode = ast.Parent(rootNode, node)
 
 	case a.do.merge:
 		path, err := yaml.PathString(a.merge.root)
@@ -68,7 +70,7 @@ func run(a *action) error {
 		fallthrough
 
 	default:
-		finalNode = f.Docs[0]
+		finalNode = rootNode
 	}
 
 	if a.do.astDump {
