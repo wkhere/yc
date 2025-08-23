@@ -14,7 +14,7 @@ import (
 
 func run(a *action) error {
 
-	f, err := parser.ParseFile(a.inputFile, parser.ParseComments)
+	f, err := parser.ParseFile(a.input.file, parser.ParseComments)
 	if err != nil {
 		return fmt.Errorf("parse: %w", err)
 	}
@@ -53,7 +53,7 @@ func run(a *action) error {
 	}
 
 	if a.do.astDump {
-		dump, err := os.Create(a.astDumpFile)
+		dump, err := os.Create(a.astDump.file)
 		if err != nil {
 			return fmt.Errorf("dump: %w", err)
 		}

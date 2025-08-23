@@ -9,17 +9,11 @@ import (
 )
 
 type action struct {
-	inputFile string
-	do        struct {
-		filter  bool
-		merge   bool
-		astDump bool
-	}
-	filter struct{ path string }
-	merge  struct {
-		root, file string
-	}
-	astDumpFile string
+	do      struct{ filter, merge, astDump bool }
+	input   struct{ file string }
+	filter  struct{ path string }
+	merge   struct{ root, file string }
+	astDump struct{ file string }
 
 	help func()
 }
@@ -60,7 +54,7 @@ flags:
 
 		case p.IsFlagExpr(arg, "-d", "--ast-dump"):
 			a.do.astDump = true
-			a.astDumpFile = p.Val
+			a.astDump.file = p.Val
 
 		case arg == "-h", arg == "--help":
 			a.help = func() { fmt.Print(usage) }
@@ -86,7 +80,7 @@ flags:
 		return a, errors.New("expected input FILE")
 
 	case len(rest) == 1:
-		a.inputFile = rest[0]
+		a.input.file = rest[0]
 	}
 	return a, nil
 }
