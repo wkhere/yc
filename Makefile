@@ -2,4 +2,7 @@ build:
 	go vet
 	go build
 
-.PHONY: build
+install:
+	go install
+
+.PHONY: build install
