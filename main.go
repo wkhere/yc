@@ -14,6 +14,7 @@ type action struct {
 	filter  struct{ path string }
 	merge   struct{ root, file string }
 	astDump struct{ file string }
+	inplace bool
 
 	help func()
 }
@@ -25,6 +26,7 @@ usage: yc [FLAGS] FILE
     -m,--merge=FILE
     -r,--merge-root=YPATH (default "$")
     -d,--ast-dump=DUMPFILE
+    -i,--inplace
 `
 	var p argp.PState
 	var rest []string
@@ -56,6 +58,9 @@ flags:
 			a.do.astDump = true
 			a.astDump.file = p.Val
 
+		case p.IsBoolFlag(arg, "-i", "--inplace"):
+			a.inplace = true
+
 		case arg == "-h", arg == "--help":
 			a.help = func() { fmt.Print(usage) }
 			return a, nil
@@ -75,6 +80,9 @@ flags:
 	switch {
 	case p.Err != nil:
 		return a, p.Err
+
+	case a.do.filter && a.inplace:
+		return a, errors.New("conflicting --filter and --inplace")
 
 	case len(rest) != 1:
 		return a, errors.New("expected input FILE")

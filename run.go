@@ -12,7 +12,7 @@ import (
 	"github.com/kr/pretty"
 )
 
-func run(a *action) error {
+func run(a *action) (rerr error) {
 
 	f, err := parser.ParseFile(a.input.file, parser.ParseComments)
 	if err != nil {
@@ -65,7 +65,25 @@ func run(a *action) error {
 	}
 
 	var p printer.Printer
+	if a.inplace {
+		w, err := os.Create(a.input.file)
+		if err != nil {
+			return fmt.Errorf("write: %w", err)
+		}
+		defer safeClose(w, &rerr)
+		_, err = w.Write(p.PrintNode(finalNode))
+		if err != nil {
+			return fmt.Errorf("write: %w", err)
+		}
+		return nil
+	}
 	os.Stdout.Write(p.PrintNode(finalNode))
-
 	return nil
+}
+
+func safeClose(f *os.File, perr *error) {
+	cerr := f.Close()
+	if cerr != nil && *perr == nil {
+		*perr = fmt.Errorf("close: %w", cerr)
+	}
 }
