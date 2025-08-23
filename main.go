@@ -99,7 +99,7 @@ func parseArgs(args []string) (a action, err error) {
 	var p argp.PState
 	var rest []string
 flags:
-	for ; len(args) > 0 && p.Err == nil; args = args[1:] {
+	for ; len(args) > 0; args = args[1:] {
 		switch arg := args[0]; {
 
 		case p.IsFlagExpr(arg, "-f", "--filter"):
