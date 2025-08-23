@@ -25,7 +25,8 @@ type action struct {
 }
 
 func parseArgs(args []string) (a action, err error) {
-	const usage = `usage: yc [FLAGS] FILE
+	const usage = `Yaml Combiner.
+usage: yc [FLAGS] FILE
     -f,--filter=YPATH
     -m,--merge=FILE
     -r,--merge-root=YPATH (default "$")
