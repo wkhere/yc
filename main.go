@@ -81,9 +81,6 @@ flags:
 	case p.Err != nil:
 		return a, p.Err
 
-	case a.do.filter && a.do.merge:
-		return a, errors.New("conflicting flags")
-
 	case len(rest) != 1:
 		return a, errors.New("expected input FILE")
 
