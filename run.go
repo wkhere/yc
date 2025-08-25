@@ -53,14 +53,9 @@ func run(a *action) (rerr error) {
 	}
 
 	if a.do.astDump {
-		dump, err := os.Create(a.astDump.file)
+		err := dumpNode(a.astDump.file, finalNode)
 		if err != nil {
-			return fmt.Errorf("dump: %w", err)
-		}
-		pretty.Fprintf(dump, "%# v\n", finalNode)
-		err = dump.Close()
-		if err != nil {
-			return fmt.Errorf("dump: %w", err)
+			a.log.Printf("skipped dump: %v", err)
 		}
 	}
 
@@ -79,6 +74,17 @@ func run(a *action) (rerr error) {
 	}
 	os.Stdout.Write(p.PrintNode(finalNode))
 	return nil
+}
+
+func dumpNode(dumpFile string, node ast.Node) (rerr error) {
+	dump, err := os.Create(dumpFile)
+	if err != nil {
+		return err
+	}
+	defer safeClose(dump, &rerr)
+	_, err = pretty.Fprintf(dump, "%# v\n", node)
+	return err
+
 }
 
 func safeClose(f *os.File, perr *error) {

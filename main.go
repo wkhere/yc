@@ -15,6 +15,7 @@ type action struct {
 	merge   struct{ root, file string }
 	astDump struct{ file string }
 	inplace bool
+	log     logger
 
 	help func()
 }
@@ -102,6 +103,7 @@ func main() {
 		a.help()
 		os.Exit(0)
 	}
+	a.log = logger{os.Stderr}
 
 	err = run(&a)
 	if err != nil {
@@ -113,3 +115,11 @@ func die(exitcode int, err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(exitcode)
 }
+
+// logger is intentionally simplified; stdlib's log.Logger features,
+// like concurrent writes, are not needed here.
+type logger struct{ w *os.File }
+
+func (l logger) Print(a ...any)                 { fmt.Fprint(l.w, a...); fmt.Fprintln(l.w) }
+func (l logger) Println(a ...any)               { fmt.Fprintln(l.w, a...) }
+func (l logger) Printf(format string, a ...any) { fmt.Fprintf(l.w, format+"\n", a...) }
