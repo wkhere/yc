@@ -19,7 +19,7 @@ func run(a *action) (rerr error) {
 		return fmt.Errorf("parse: %w", err)
 	}
 	if len(f.Docs) > 1 {
-		return errors.New("multiple documents not handled")
+		return errors.New("multiple documents not supported")
 	}
 	var rootNode ast.Node = f.Docs[0]
 	var finalNode = rootNode
