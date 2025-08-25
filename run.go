@@ -25,31 +25,17 @@ func run(a *action) (rerr error) {
 	var finalNode = rootNode
 
 	if a.do.merge {
-		path, err := yaml.PathString(a.merge.root)
-		if err != nil {
-			return fmt.Errorf("merge root: %w", errors.Unwrap(err))
-		}
-
-		r, err := parser.ParseFile(a.merge.file, parser.ParseComments)
-		if err != nil {
-			return fmt.Errorf("merged file: %w", err)
-		}
-		err = path.MergeFromFile(f, r)
+		err = merge(f, a.merge.root, a.merge.file)
 		if err != nil {
 			return fmt.Errorf("merge: %w", err)
 		}
 	}
 
 	if a.do.filter {
-		path, err := yaml.PathString(a.filter.path)
-		if err != nil {
-			return fmt.Errorf("filter path: %w", errors.Unwrap(err))
-		}
-		node, err := path.FilterFile(f)
+		err = filter(f, &finalNode, rootNode, a.filter.path)
 		if err != nil {
 			return fmt.Errorf("filter: %w", err)
 		}
-		finalNode = ast.Parent(rootNode, node)
 	}
 
 	if a.do.astDump {
@@ -61,18 +47,38 @@ func run(a *action) (rerr error) {
 
 	var p printer.Printer
 	if a.inplace {
-		w, err := os.Create(a.input.file)
-		if err != nil {
-			return fmt.Errorf("write: %w", err)
-		}
-		defer safeClose(w, &rerr)
-		_, err = w.Write(p.PrintNode(finalNode))
+		err = writeFile(a.input.file, p.PrintNode(finalNode))
 		if err != nil {
 			return fmt.Errorf("write: %w", err)
 		}
 		return nil
 	}
 	os.Stdout.Write(p.PrintNode(finalNode))
+	return nil
+}
+
+func merge(f *ast.File, mergeRoot, mergeFile string) error {
+	path, err := yaml.PathString(mergeRoot)
+	if err != nil {
+		return errors.Unwrap(err)
+	}
+	r, err := parser.ParseFile(mergeFile, parser.ParseComments)
+	if err != nil {
+		return err
+	}
+	return path.MergeFromFile(f, r)
+}
+
+func filter(f *ast.File, dest *ast.Node, root ast.Node, filterPath string) error {
+	path, err := yaml.PathString(filterPath)
+	if err != nil {
+		return errors.Unwrap(err)
+	}
+	node, err := path.FilterFile(f)
+	if err != nil {
+		return fmt.Errorf("filter: %w", err)
+	}
+	*dest = ast.Parent(root, node)
 	return nil
 }
 
@@ -85,6 +91,16 @@ func dumpNode(dumpFile string, node ast.Node) (rerr error) {
 	_, err = pretty.Fprintf(dump, "%# v\n", node)
 	return err
 
+}
+
+func writeFile(file string, buf []byte) (rerr error) {
+	w, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer safeClose(w, &rerr)
+	_, err = w.Write(buf)
+	return err
 }
 
 func safeClose(f *os.File, perr *error) {
