@@ -76,7 +76,7 @@ func filter(f *ast.File, dest *ast.Node, root ast.Node, filterPath string) error
 	}
 	node, err := path.FilterFile(f)
 	if err != nil {
-		return fmt.Errorf("filter: %w", err)
+		return err
 	}
 	*dest = ast.Parent(root, node)
 	return nil
