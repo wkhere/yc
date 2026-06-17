@@ -1,6 +1,6 @@
 module gitlab.com/wkhere/yc
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/goccy/go-yaml v1.18.0
