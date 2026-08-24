@@ -10,6 +10,7 @@ import (
 
 type action struct {
 	do      struct{ filter, merge, astDump bool }
+	has     struct{ merge struct{ root bool } }
 	input   struct{ file string }
 	filter  struct{ path string }
 	merge   struct{ root, file string }
@@ -50,6 +51,7 @@ flags:
 			}
 
 		case p.MatchFlagExpr("-r", "--merge-root"):
+			a.has.merge.root = true
 			a.merge.root = p.Val
 			if a.merge.root[0] != '$' {
 				a.merge.root = "$" + a.merge.root
@@ -84,6 +86,9 @@ flags:
 
 	case a.do.filter && a.inplace:
 		return a, errors.New("conflicting --filter and --inplace")
+
+	case a.has.merge.root && !a.do.merge:
+		return a, errors.New("--merge-root requires --merge")
 
 	case len(rest) != 1:
 		return a, errors.New("expected input FILE")
