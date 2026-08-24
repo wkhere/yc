@@ -29,52 +29,52 @@ usage: yc [FLAGS] FILE
     -d,--ast-dump=DUMPFILE
     -i,--inplace
 `
-	var p argp.PState
+	var p = argp.PState{Args: args}
 	var rest []string
 flags:
-	for ; len(args) > 0; args = args[1:] {
-		switch arg := args[0]; {
+	for ; len(p.Args) > 0; p.Next() {
+		switch {
 
-		case p.IsFlagExpr(arg, "-f", "--filter"):
+		case p.MatchFlagExpr("-f", "--filter"):
 			a.do.filter = true
 			a.filter.path = p.Val
 			if a.filter.path[0] != '$' {
 				a.filter.path = "$" + a.filter.path
 			}
 
-		case p.IsFlagExpr(arg, "-m", "--merge"):
+		case p.MatchFlagExpr("-m", "--merge"):
 			a.do.merge = true
 			a.merge.file = p.Val
 			if a.merge.root == "" {
 				a.merge.root = "$"
 			}
 
-		case p.IsFlagExpr(arg, "-r", "--merge-root"):
+		case p.MatchFlagExpr("-r", "--merge-root"):
 			a.merge.root = p.Val
 			if a.merge.root[0] != '$' {
 				a.merge.root = "$" + a.merge.root
 			}
 
-		case p.IsFlagExpr(arg, "-d", "--ast-dump"):
+		case p.MatchFlagExpr("-d", "--ast-dump"):
 			a.do.astDump = true
 			a.astDump.file = p.Val
 
-		case p.IsBoolFlag(arg, "-i", "--inplace"):
+		case p.MatchJustFlag("-i", "--inplace"):
 			a.inplace = true
 
-		case arg == "-h", arg == "--help":
+		case p.MatchJustFlag("-h", "--help"):
 			a.help = func() { fmt.Print(usage) }
 			return a, nil
 
-		case arg == "--":
-			rest = append(rest, args[1:]...)
+		case p.Arg() == "--":
+			rest = append(rest, p.Args[1:]...)
 			break flags
 
-		case len(arg) > 1 && arg[0] == '-':
-			p.Errorf("unknown flag %s", arg)
+		case p.MatchAnyFlag():
+			p.Errorf("unknown flag %s", p.Flag)
 
 		default:
-			rest = append(rest, arg)
+			rest = append(rest, p.Arg())
 		}
 	}
 

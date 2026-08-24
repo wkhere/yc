@@ -8,5 +8,5 @@ github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZV
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/wkhere/go-yaml v1.18.1-fix2 h1:V9OD1TMwL8uv8T/+hWi1bq7huxoeWkaWf81wVCWx0VY=
 github.com/wkhere/go-yaml v1.18.1-fix2/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
-gitlab.com/wkhere/argp v0.2.1 h1:ymztEYKj6AwzNJZxsyqi0Vvu27NmkRY1b0fwYhdTDno=
-gitlab.com/wkhere/argp v0.2.1/go.mod h1:GjNMvCrvnKiNbSQ8Qn25e3TJSOqsklVJ4wzPj/R/xU8=
+gitlab.com/wkhere/argp v0.6.0 h1:BVNA28M2fxhWvftelfF8vZj9UQYDOzxbOIexiUCCM/E=
+gitlab.com/wkhere/argp v0.6.0/go.mod h1:22WPu5MrjcpKK0/bmQaL/+mdDeoXhV2pMB+NWHU4yUI=
