@@ -3,6 +3,6 @@ build:
 	go build
 
 install:
-	go install
+	go install -ldflags=-s
 
 .PHONY: build install
