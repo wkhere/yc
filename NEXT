@@ -1,0 +1,2 @@
+- flag for creating backup file when writing with --inplace
+- warn when dump file is to be overwritten
