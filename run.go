@@ -12,7 +12,7 @@ import (
 	"github.com/kr/pretty"
 )
 
-func run(a *action) (rerr error) {
+func run(a *action) error {
 
 	f, err := parser.ParseFile(a.input.file, parser.ParseComments)
 	if err != nil {
