@@ -1,4 +1,4 @@
-module gitlab.com/wkhere/yc
+module github.com/wkhere/yc
 
 go 1.22.0
 
