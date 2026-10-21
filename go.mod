@@ -3,9 +3,9 @@ module github.com/wkhere/yc
 go 1.22.0
 
 require (
+	codeberg.org/wkhere/argp v0.15.0
 	github.com/goccy/go-yaml v1.18.0
 	github.com/kr/pretty v0.3.1
-	gitlab.com/wkhere/argp v0.6.0
 )
 
 replace github.com/goccy/go-yaml => github.com/wkhere/go-yaml v1.18.1-fix2

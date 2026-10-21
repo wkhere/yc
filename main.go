@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.com/wkhere/argp"
+	"codeberg.org/wkhere/argp"
 )
 
 type action struct {
